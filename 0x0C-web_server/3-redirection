@@ -1,12 +1,34 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Installs, configures, and starts the server
+apt-get update
+apt-get -y install nginx
+sudo ufw allow 'Nginx HTTP'
+mkdir -p /var/www/html/
+sudo chmod -R 755 /var/www
+echo 'Hello World!' > /var/www/html/index.html
+SERVER_CONFIG=\
+"server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
 
-# Install Nginx
-sudo apt-get update
-sudo apt-get install -y nginx
+	root /var/www/html;
+	index index.html index.htm index.nginx-debian.html;
 
-# Configure the redirection
-sudo sed -i '/listen 80 default_server/a location /redirect_me {\n\treturn 301 https://youtu.be/hzPh5PBh3_w;\n}' /etc/nginx/sites-available/default
+	server_name _;
 
-# Restart Nginx to apply the configuration
-sudo service nginx restart
+	location / {
+		try_files \$uri \$uri/ =404;
+	}
 
+	if (\$request_filename ~ redirect_me){
+		rewrite ^ https://youtu.be/hzPh5PBh3_w permanent;
+	}
+}"
+
+bash -c "echo -e '$SERVER_CONFIG' > /etc/nginx/sites-enabled/default"
+
+if [ "$(pgrep -c nginx)" -le 0 ]; then
+	service nginx start
+else
+	service nginx restart
+fii

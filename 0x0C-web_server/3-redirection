@@ -21,7 +21,7 @@ SERVER_CONFIG=\
 	}
 
 	if (\$request_filename ~ redirect_me){
-		rewrite ^ https://youtu.be/hzPh5PBh3_w permanent;
+		rewrite ^ https://sketchfab.com/bluepeno/models permanent;
 	}
 }"
 
@@ -31,4 +31,4 @@ if [ "$(pgrep -c nginx)" -le 0 ]; then
 	service nginx start
 else
 	service nginx restart
-fii
+fi

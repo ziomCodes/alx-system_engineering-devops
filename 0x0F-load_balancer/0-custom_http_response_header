@@ -1,16 +1,42 @@
 #!/usr/bin/env bash
-# Double the number of webservers.
-sudo apt-get update
-sudo apt-get -y install nginx
-sudo chown $USER:$USER /var/www/html/index.html
-sudo touch index.html /var/www/html/
+# Installs, configures, and starts the web server
+apt-get update
+apt-get -y install nginx
+ufw allow 'Nginx HTTP'
+mkdir -p /var/www/html /var/www/error
+chmod -R 755 /var/www
 echo 'Hello World!' > /var/www/html/index.html
-sudo mkdir /var/www/error
-sudo chown  $USER:$USER /var/www/error/
-echo "Ceci n'est pas une page" > /var/www/error/404.html
-sudo chown  $USER:$USER /etc/nginx/sites-available/
-sed -i '/server_name _/a location /redirect_me { rewrite ^ https://www.youtube.com/watch?v=QH2-TGUlw\u4? permanent; }' /etc/nginx/sites-available/default
-sed -i '/server_name _/a error_page 404 /404.html; location = /404.html {root /var/www/error/; internal; }' /etc/nginx/sites-available/default
-# in the server 1 also 2 this down
-sudo sed -i "/server_name _/a add_header X-Served-By $HOSTNAME;" /etc/nginx/sites-available/default
-sudo service nginx restart
+echo -e "Ceci n\x27est pas une page" > /var/www/error/404.html
+# the server's configuration
+SERVER_CONFIG=\
+"server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+	root /var/www/html;
+	index index.html index.htm index.nginx-debian.html;
+
+	server_name _;
+
+	location / {
+		try_files \$uri \$uri/ =404;
+		add_header X-Served-By \$hostname;
+	}
+
+	if (\$request_filename ~ redirect_me){
+		rewrite ^ https://sketchfab.com/bluepeno/models permanent;
+	}
+
+	error_page 404 /404.html;
+	location = /404.html {
+		root /var/www/error/;
+		internal;
+		add_header X-Served-By \$hostname;
+	}
+}"
+bash -c "echo -e '$SERVER_CONFIG' > /etc/nginx/sites-enabled/default"
+if [ "$(pgrep -c nginx)" -le 0 ]; then
+	service nginx start
+else
+	service nginx restart
+fi

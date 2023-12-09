@@ -1,1 +1,1 @@
-This are tasks for the web stack debugging project.
+This are tasks for web stack debugging 1 project.

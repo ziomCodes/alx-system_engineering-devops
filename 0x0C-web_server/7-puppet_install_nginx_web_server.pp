@@ -21,7 +21,7 @@ file { 'The home page':
 
 file { 'The 404 page':
   ensure  => file,
-  path    => '/var/www/error/404.html',
+  path    => '/var/www/html/404.html',
   mode    => '0744',
   owner   => 'www-data',
   content => "Ceci n'est pas une page\n"
@@ -47,12 +47,12 @@ file { 'Nginx server config file':
 	}
 
 	if (\$request_filename ~ redirect_me){
-		rewrite ^ https://sketchfab.com/bluepeno/models permanent;
+		rewrite ^ https://github.com/ziomCodes permanent;
 	}
 
 	error_page 404 /404.html;
 	location = /404.html {
-		root /var/www/error/;
+		root /var/www/html/;
 		internal;
 	}
 }"
